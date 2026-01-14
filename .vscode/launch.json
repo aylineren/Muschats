@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "type": "firefox",
             "request": "launch",
             "name": "Open login.html",
-            "file": "c:\\Users\\ailin\\Documents\\GitHub\\Projekts\\templates\\login.html"
+            "file": "c:\\Users\\ailin\\Documents\\GitHub\\Projekts\\templates\\home.html"
         }
     ]
 }
