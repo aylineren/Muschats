@@ -10,24 +10,24 @@
 <body>
   <ul class="nav justify-content-center">
   <li class="nav-item position-absolute top-0 start-0">
-    <a href="home.html"><img src="cat.gif" alt="Mūschats" style="width:95px;height:60px;"></a>
+    <a href="{{ url_for('home') }}"><img src="cat.gif" alt="Mūschats" style="width:95px;height:60px;"></a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="login.html">Pieslēgties</a>
+    <a class="nav-link" href="{{ url_for('login') }}">Pieslēgties</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="register.html">Reģistrēties</a>
+    <a class="nav-link" href="{{ url_for('register') }}">Reģistrēties</a>
   </li>
 </ul> 
 
 <div class="container mt-5">
     <h1>Mūschats</h1>
-    <a href="/create_discussion" class="btn btn-primary">Pievienot diskusiju</a>
+    <a href="/pievienot_disk" class="btn btn-primary">Pievienot diskusiju</a>
     <div class="mt-4">
         {% for discussion in discussions %}
             <div class="card mb-3">
                 <div class="card-body">
-                    <h2 class="card-title"><a href="/discussion/{{ discussion.id }}">{{ discussion.title }}</a></h2>
+                    <h2 class="card-title"><a href="/diskusija/{{ discussion.id }}">{{ discussion.title }}</a></h2>
                     <p class="card-text">{{ discussion.content }}</p>
                     <p class="card-text"><small class="text-muted">Likes: {{ discussion.likes|length }}</small></p>
                 </div>

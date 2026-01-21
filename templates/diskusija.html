@@ -5,14 +5,14 @@
     <h1>{{ discussion.title }}</h1>
     <p>{{ discussion.content }}</p>
     <a href="/like/discussion/{{ discussion.id }}">Like</a> ({{ discussion.likes|length }})
-    <h2>Comments</h2>
+    <h2>Komentāri</h2>
     {% for comment in comments %}
         <p>{{ comment.content }}</p>
         <a href="/like/comment/{{ comment.id }}">Like</a> ({{ comment.likes|length }})
     {% endfor %}
     <form method="POST">
         <textarea name="content" placeholder="Add comment" required></textarea><br>
-        <button type="submit">Comment</button>
+        <button type="submit">Komentēt</button>
     </form>
 </body>
 </html>
