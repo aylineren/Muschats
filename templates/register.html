@@ -9,21 +9,22 @@
 
 <body>
   <ul class="nav justify-content-center">
-  <li class="nav-item">
-    <a href="home.html"><img src="cat.gif" style="width:42px;height:42px;"></a>
+  <li class="nav-item position-absolute top-0 start-0">
+    <a href="home.html"><img src="cat.gif" alt="Mūschats" style="width:95px;height:60px;"></a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="#">Pieslēgties</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="login.html">Reģistrēties</a>
+    <a class="nav-link" href="login.html">Pieslēgties</a>
   </li>
 </ul> 
 
   <div class="container-sm" style="width:40%">
       <form action="/action_page.php">
     <div class="mb-3 mt-3">
-      <label for="email" class="form-label">Email:</label>
+      <label for="vards" class="form-label">Vārds:</label>
+      <input type="text" class="form-control" id="vards" placeholder="Enter vards" name="vards">
+    </div>
+    <div class="mb-3 mt-3">
+      <label for="email" class="form-label">E-mail:</label>
       <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
     </div>
     <div class="mb-3">
