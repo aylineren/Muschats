@@ -20,6 +20,21 @@
   </li>
 </ul> 
 
+<div class="container mt-5">
+    <h1>Mūschats</h1>
+    <a href="/create_discussion" class="btn btn-primary">Pievienot diskusiju</a>
+    <div class="mt-4">
+        {% for discussion in discussions %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h2 class="card-title"><a href="/discussion/{{ discussion.id }}">{{ discussion.title }}</a></h2>
+                    <p class="card-text">{{ discussion.content }}</p>
+                    <p class="card-text"><small class="text-muted">Likes: {{ discussion.likes|length }}</small></p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
 </body>
 </html>
