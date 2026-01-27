@@ -10,7 +10,7 @@
 <body>
   <ul class="nav justify-content-center">
   <li class="nav-item position-absolute top-0 start-0">
-    <a href="{{ url_for('home') }}"><img src="cat.gif" alt="Mūschats" style="width:95px;height:60px;"></a>
+    <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='cat.gif') }}" alt="Mūschats" style="width:95px;height:60px;"></a>
   </li>
   <li class="nav-item">
     <a class="nav-link" href="{{ url_for('login') }}">Pieslēgties</a>
