@@ -2,37 +2,35 @@ from flask import Flask, request, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///datubaze.db'
 app.config['SECRET_KEY'] = '555555'
 db = SQLAlchemy(app)
 
-class User(db.Model):
+class Lietotaji(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(15), unique=True, nullable=False)
-    password = db.Column(db.String(20), nullable=False)
-    name = db.Column(db.String(15), nullable=False)
-    surname = db.Column(db.String(15), nullable=False)
-    role = db.Column(db.String(50), nullable=False)
-
-with app.app_context():
-    db.create_all()
+    lietotajvards = db.Column(db.String(80), unique=True, nullable=False)
+    parole = db.Column(db.String(20), nullable=False)
+    vards = db.Column(db.String(80), nullable=False)
+    uzvards = db.Column(db.String(80), nullable=False)
+    loma = db.Column(db.String(80), nullable=False)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    discussions = []
+    return render_template("index.html", discussions=discussions)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")[:20]  # Limit to 20 chars
-        name = request.form.get("name")
-        surname = request.form.get("surname")
-        role = request.form.get("role")
-        if User.query.filter_by(username=username).first():
+        lietotajvards = request.form.get("lietotajvards")
+        parole = request.form.get("parole")[:20]
+        vards = request.form.get("vards")
+        uzvards = request.form.get("uzvards")
+        loma = request.form.get("loma")
+        if Lietotaji.query.filter_by(lietotajvards=lietotajvards).first():
             return "Lietotājvārds jau pastāv", 400
-        new_user = User(username=username, password=password, name=name, surname=surname, role=role)
-        db.session.add(new_user)
+        jauns_lietotajs = Lietotaji(lietotajvards=lietotajvards, parole=parole, vards=vards, uzvards=uzvards, loma=loma)
+        db.session.add(jauns_lietotajs)
         db.session.commit()
         return redirect(url_for("login"))
     return render_template("register.html")
@@ -40,10 +38,10 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        user = User.query.filter_by(username=username).first()
-        if user and user.password == password:
+        lietotajvards = request.form.get("lietotajvards")
+        parole = request.form.get("parole")
+        lietotajs = Lietotaji.query.filter_by(lietotajvards=lietotajvards).first()
+        if lietotajs and lietotajs.parole == parole:
             return redirect(url_for("index"))
         return "Nepareizs lietotājvārds vai parole", 401
     return render_template("login.html")

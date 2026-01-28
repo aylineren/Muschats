@@ -19,25 +19,25 @@
   <div class="container-sm" style="width:40%">
       <form method="POST">
     <div class="mb-3 mt-3">
-      <label for="username" class="form-label">Lietotājvārds:</label>
-      <input type="text" class="form-control" id="username" placeholder="Ievadiet lietotājvārdu" name="username" required>
+      <label for="lietotajvards" class="form-label">Lietotājvārds:</label>
+      <input type="text" class="form-control" id="lietotajvards" placeholder="Ievadiet lietotājvārdu" name="lietotajvards" required>
     </div>
     <div class="mb-3 mt-3">
-      <label for="password" class="form-label">Parole:</label>
-      <input type="password" class="form-control" id="password" placeholder="Ievadiet paroli" name="password" required>
+      <label for="parole" class="form-label">Parole:</label>
+      <input type="password" class="form-control" id="parole" placeholder="Ievadiet paroli" name="parole" required>
       <button type="button" class="btn btn-secondary mt-2" onclick="generatePassword()">Ģenerēt drošu paroli</button>
     </div>
     <div class="mb-3 mt-3">
-      <label for="name" class="form-label">Vārds:</label>
-      <input type="text" class="form-control" id="name" placeholder="Ievadiet vārdu" name="name" required>
+      <label for="vards" class="form-label">Vārds:</label>
+      <input type="text" class="form-control" id="vards" placeholder="Ievadiet vārdu" name="vards" required>
     </div>
     <div class="mb-3 mt-3">
-      <label for="surname" class="form-label">Uzvārds:</label>
-      <input type="text" class="form-control" id="surname" placeholder="Ievadiet uzvārdu" name="surname" required>
+      <label for="uzvards" class="form-label">Uzvārds:</label>
+      <input type="text" class="form-control" id="uzvards" placeholder="Ievadiet uzvārdu" name="uzvards" required>
     </div>
     <div class="mb-3">
-      <label for="role" class="form-label">Loma:</label>
-      <select class="form-select" id="role" name="role">
+      <label for="loma" class="form-label">Loma:</label>
+      <select class="form-select" id="loma" name="loma">
         <option value="student">Skolēns</option>
         <option value="teacher">Skolotājs</option>
       </select>
@@ -47,11 +47,11 @@
   <script>
     function generatePassword() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-      let password = '';
+      let parole = '';
       for (let i = 0; i < 20; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
+        parole += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      document.getElementById('password').value = password;
+      document.getElementById('parole').value = parole;
     }
   </script>
 </body>
