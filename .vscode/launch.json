@@ -7,8 +7,8 @@
         {
             "type": "firefox",
             "request": "launch",
-            "vards": "Open login.html",
-            "file": "c:\\Lietotajss\\ailin\\Documents\\GitHub\\Projekts\\templates\\index.html"
+            "name": "Open login.html",
+            "file": "c:\\datubaze\\ailin\\Documents\\GitHub\\Projekts\\templates\\index.html"
         }
     ]
 }

@@ -1,16 +1,27 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import os
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+instance_folder = os.path.join(basedir, 'instance')
+os.makedirs(instance_folder, exist_ok=True)
+db_path = os.path.join(instance_folder, 'datubaze.db')
+# Convert backslashes to forward slashes for SQLite URI
+db_path_uri = db_path.replace('\\', '/')
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///datubaze.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path_uri}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '555555' 
 db = SQLAlchemy(app)
 
 class Lietotaji(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lietotajvards = db.Column(db.String(80), unique=True, nullable=False)
-    parole = db.Column(db.String(20), nullable=False)
+    parole = db.Column(db.String(255), nullable=False)
     vards = db.Column(db.String(80), nullable=False)
     uzvards = db.Column(db.String(80), nullable=False)
     loma = db.Column(db.String(80), nullable=False)
@@ -53,13 +64,14 @@ def index():
 def register():
     if request.method == "POST":
         lietotajvards = request.form.get("lietotajvards")
-        parole = request.form.get("parole")[:20]
+        parole = request.form.get("parole")
         vards = request.form.get("vards")
         uzvards = request.form.get("uzvards")
         loma = request.form.get("loma")
         if Lietotaji.query.filter_by(lietotajvards=lietotajvards).first():
             return "Lietotājvārds jau pastāv", 400
-        jauns_lietotajs = Lietotaji(lietotajvards=lietotajvards, parole=parole, vards=vards, uzvards=uzvards, loma=loma)
+        hashed_password = generate_password_hash(parole)
+        jauns_lietotajs = Lietotaji(lietotajvards=lietotajvards, parole=hashed_password, vards=vards, uzvards=uzvards, loma=loma)
         db.session.add(jauns_lietotajs)
         db.session.commit()
         return redirect(url_for("login"))
@@ -71,7 +83,7 @@ def login():
         lietotajvards = request.form.get("lietotajvards")
         parole = request.form.get("parole")
         lietotajs = Lietotaji.query.filter_by(lietotajvards=lietotajvards).first()
-        if lietotajs and lietotajs.parole == parole:
+        if lietotajs and check_password_hash(lietotajs.parole, parole):
             session['lietotajvards'] = lietotajvards
             session['lietotaja_id'] = lietotajs.id
             return redirect(url_for("index"))
@@ -119,4 +131,21 @@ def patikt():
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
+    with app.app_context():
+        print(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
+        print(f"Database file path: {db_path}")
+        db.create_all()
+        
+        # Check what tables were created
+        insp = inspect(db.engine)
+        tables = insp.get_table_names()
+        print(f"Tables in database: {tables}")
+        
+        # Ensure Patikumi table has at least one entry
+        if Patikumi.query.count() == 0:
+            patikums = Patikumi(skaits=0)
+            db.session.add(patikums)
+            db.session.commit()
+            print("Created Patikumi entry")
+        print("Database initialized successfully")
     app.run(debug=True)
