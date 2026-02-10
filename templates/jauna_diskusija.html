@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jauna diskusija</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        form { max-width: 600px; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Jauna diskusija</h1>
+    <form method="POST">
+        <input type="text" name="virsraksts" placeholder="Diskusijas virsraksts" required>
+        <textarea name="saturs" placeholder="Diskusijas saturs" rows="10" required></textarea>
+        <button type="submit">Izveidot diskusiju</button>
+    </form>
+    <a href="{{ url_for('index') }}">Atpakaj uz sakstnei</a>
+</body>
+</html>

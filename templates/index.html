@@ -1,10 +1,18 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta vards="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <title>Mūschats</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .nav a { margin-right: 15px; text-decoration: none; color: blue; }
+        .diskusija { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .diskusija a { color: blue; text-decoration: none; font-weight: bold; }
+        .info { color: #666; font-size: 0.9em; }
+    </style>
 </head>
 
 <body>
@@ -20,21 +28,42 @@
   </li>
 </ul> 
 
-<div class="container mt-5">
+<div class="header">
     <h1>Mūschats</h1>
-    <a href="/pievienot_disk" class="btn btn-primary">Pievienot diskusiju</a>
-    <div class="mt-4">
-        {% for discussion in discussions %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h2 class="card-title"><a href="/diskusija/{{ discussion.id }}">{{ discussion.title }}</a></h2>
-                    <p class="card-text">{{ discussion.content }}</p>
-                    <p class="card-text"><small class="text-muted">Likes: {{ discussion.likes|length }}</small></p>
-                </div>
-            </div>
-        {% endfor %}
+    <div class="nav">
+        {% if ir_piesledzis %}
+            <span>Sveiki, {{ session['lietotajvards'] }}!</span>
+            <a href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a>
+            <a href="{{ url_for('logout') }}">Izlogoties</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Ielogoties</a>
+            <a href="{{ url_for('register') }}">Rejestracija</a>
+        {% endif %}
     </div>
 </div>
 
+<div style="margin-bottom: 20px;">
+    <h3>Patikumi: {{ patikumi }}</h3>
+    {% if ir_piesledzis %}
+        <a href="{{ url_for('patikt') }}" style="padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 3px;">👍 Patikt</a>
+    {% else %}
+        <p><a href="{{ url_for('login') }}">Ielogoties</a> lai nospiestu patikt.</p>
+    {% endif %}
+</div>
+
+<h2>Diskusijas</h2>
+{% if diskusijas %}
+    {% for d in diskusijas %}
+        <div class="diskusija">
+            <a href="{{ url_for('diskusija', diskusijas_id=d.id) }}">{{ d.virsraksts }}</a>
+            <p>{{ d.saturs[:200] }}...</p>
+            <div class="info">
+                Autors: {{ d.lietotaja_id }} | {{ d.datums.strftime('%Y-%m-%d %H:%M') }} | Komentari: {{ d.komentari|length }}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Nav nevienas diskusijas.</p>
+{% endif %}
 </body>
 </html>
