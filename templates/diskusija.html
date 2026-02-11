@@ -2,21 +2,14 @@
 <html>
 <head>
     <title>{{ diskusija.virsraksts }}</title>
-    <style>
-        body { font-family: Arial; margin: 20px; }
-        .diskusija { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
-        .komentars { border-left: 3px solid #4CAF50; padding: 10px; margin: 10px 0; background: #f9f9f9; }
-        textarea { width: 100%; padding: 10px; }
-        button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
-    </style>
 </head>
 <body>
-    <a href="{{ url_for('index') }}">← Atpakaj</a>
+    <a href="{{ url_for('index') }}">← Atpakaļ</a>
     
     <div class="diskusija">
         <h1>{{ diskusija.virsraksts }}</h1>
         <p>{{ diskusija.saturs }}</p>
-        <div style="color: #666; font-size: 0.9em;">
+        <div>
             Autors: {{ diskusija.lietotaja_id }} | {{ diskusija.datums.strftime('%Y-%m-%d %H:%M') }}
         </div>
     </div>
@@ -29,7 +22,7 @@
             <button type="submit">Sūtit komentaru</button>
         </form>
     {% else %}
-        <p><a href="{{ url_for('login') }}">Ielogoties</a> lai komentetu.</p>
+        <p><a href="{{ url_for('login') }}">Pieslēgties</a> lai komentetu.</p>
     {% endif %}
 
     {% if diskusija.komentari %}

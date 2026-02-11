@@ -8,7 +8,7 @@
             "type": "firefox",
             "request": "launch",
             "name": "Open login.html",
-            "file": "c:\\datubaze\\ailin\\Documents\\GitHub\\Projekts\\templates\\index.html"
+            "file": "C:\\Users\\ailin\\Documents\\GitHub\\Projekts\\templates\\index.html"
         }
     ]
 }

@@ -7,46 +7,45 @@
     <title>Mūschats</title>
 </head>
 
-<body>
-  <ul class="nav justify-content-center">
-  <li class="nav-item position-absolute top-0 start-0">
-    <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='cat.gif') }}" alt="Mūschats" style="width:95px;height:60px;"></a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('login') }}">Pieslēgties</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{{ url_for('register') }}">Reģistrēties</a>
-  </li>
-</ul> 
+<body><div class="container-md">
+<div class="d-flex justify-content-between">
+<nav class="navbar navbar-light bg-light">
+  <a class="navbar-brand" href="{{ url_for('index') }}">Mūschats</a>
+    <div class="navbar-nav">
+    <a class="nav-item nav-link" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='cat.gif') }}" alt="Mūschats" style="width:95px;height:60px;"></a>
+      {% if ir_piesledzis %}
+        <span class="nav-item nav-link">Sveiki, {{ session['vards'] }}!</span>
+        <a class="nav-item nav-link" href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a>
+        <a class="nav-item nav-link" href="{{ url_for('logout') }}">Atteikties</a>
+      {% else %}
+      <a class="nav-item nav-link" href="{{ url_for('login') }}">Pieslēgties</a>
+      <a class="nav-item nav-link" href="{{ url_for('register') }}">Reģistrēties</a>
+      {% endif %}
+    </div></nav>
+  </div>
 
 <div class="header">
-    <h1>Mūschats</h1>
     <div class="nav">
         {% if ir_piesledzis %}
-            <span>Sveiki, {{ session['lietotajvards'] }}!</span>
+            <span>Sveiki, {{ session['vards'] }}!</span>
             <a href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a>
-            <a href="{{ url_for('logout') }}">Izlogoties</a>
-        {% else %}
-            <a href="{{ url_for('login') }}">Ielogoties</a>
-            <a href="{{ url_for('register') }}">Rejestracija</a>
         {% endif %}
     </div>
 </div>
 
 <div style="margin-bottom: 20px;">
-    <h3>Patikumi: {{ patikumi }}</h3>
+    <h3>{{ patikumi }} 👍 Patikumi </h3>
     {% if ir_piesledzis %}
-        <a href="{{ url_for('patikt') }}" style="padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 3px;">👍 Patikt</a>
+        <a href="{{ url_for('patikt') }}">👍 Patīk</a>
     {% else %}
-        <p><a href="{{ url_for('login') }}">Ielogoties</a> lai nospiestu patikt.</p>
+        <p><a href="{{ url_for('login') }}">Pieslēgties</a> lai nospiestu patikt.</p>
     {% endif %}
 </div>
 
-<h2>Diskusijas</h2>
+
+<div class="d-inline-flex p-2 bd-highlight"><h2>Diskusijas</h2>
 {% if diskusijas %}
     {% for d in diskusijas %}
-        <div class="diskusija">
             <a href="{{ url_for('diskusija', diskusijas_id=d.id) }}">{{ d.virsraksts }}</a>
             <p>{{ d.saturs[:200] }}...</p>
             <div class="info">
@@ -57,5 +56,5 @@
 {% else %}
     <p>Nav nevienas diskusijas.</p>
 {% endif %}
-</body>
+</div></body>
 </html>

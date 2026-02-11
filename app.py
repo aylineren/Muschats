@@ -9,11 +9,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 instance_folder = os.path.join(basedir, 'instance')
 os.makedirs(instance_folder, exist_ok=True)
 db_path = os.path.join(instance_folder, 'datubaze.db')
-# Convert backslashes to forward slashes for SQLite URI
-db_path_uri = db_path.replace('\\', '/')
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path_uri}'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '555555' 
 db = SQLAlchemy(app)
@@ -136,16 +134,6 @@ if __name__ == "__main__":
         print(f"Database file path: {db_path}")
         db.create_all()
         
-        # Check what tables were created
-        insp = inspect(db.engine)
-        tables = insp.get_table_names()
-        print(f"Tables in database: {tables}")
         
-        # Ensure Patikumi table has at least one entry
-        if Patikumi.query.count() == 0:
-            patikums = Patikumi(skaits=0)
-            db.session.add(patikums)
-            db.session.commit()
-            print("Created Patikumi entry")
         print("Database initialized successfully")
     app.run(debug=True)
