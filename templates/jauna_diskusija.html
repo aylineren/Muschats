@@ -1,15 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Jauna diskusija</title>
-</head>
-<body>
-    <h1>Jauna diskusija</h1>
-    <form method="POST">
-        <input type="text" name="virsraksts" placeholder="Diskusijas virsraksts" required>
-        <textarea name="saturs" placeholder="Diskusijas saturs" rows="10" required></textarea>
-        <button type="submit">Pievienot diskusiju</button>
-    </form>
-    <a href="{{ url_for('index') }}">Atpakaļ uz sakumlapu</a>
-</body>
-</html>
+{% extends "layout.html" %}
+{% block title %}Jauna diskusija — Mūschats{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-3">Jauna diskusija</h3>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Virsraksts</label>
+                        <input type="text" class="form-control" name="virsraksts" maxlength="30" placeholder="Diskusijas virsraksts">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Saturs</label>
+                        <textarea name="saturs" class="form-control" placeholder="Diskusijas saturs" rows="8" maxlength="2500" required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Atpakaļ</a>
+                        <button type="submit" class="btn btn-primary">Pievienot diskusiju</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

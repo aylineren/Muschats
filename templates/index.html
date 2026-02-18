@@ -1,60 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta vards="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <title>Mūschats</title>
-</head>
+{% extends "layout.html" %}
+{% block title %}Mūschats — Sākums{% endblock %}
 
-<body><div class="container-md">
-<div class="d-flex justify-content-between">
-<nav class="navbar navbar-light bg-light">
-  <a class="navbar-brand" href="{{ url_for('index') }}">Mūschats</a>
-    <div class="navbar-nav">
-    <a class="nav-item nav-link" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='cat.gif') }}" alt="Mūschats" style="width:95px;height:60px;"></a>
-      {% if ir_piesledzis %}
-        <span class="nav-item nav-link">Sveiki, {{ session['vards'] }}!</span>
-        <a class="nav-item nav-link" href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a>
-        <a class="nav-item nav-link" href="{{ url_for('logout') }}">Atteikties</a>
-      {% else %}
-      <a class="nav-item nav-link" href="{{ url_for('login') }}">Pieslēgties</a>
-      <a class="nav-item nav-link" href="{{ url_for('register') }}">Reģistrēties</a>
-      {% endif %}
-    </div></nav>
-  </div>
-
-<div class="header">
-    <div class="nav">
-        {% if ir_piesledzis %}
-            <span>Sveiki, {{ session['vards'] }}!</span>
-            <a href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a>
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Diskusijas</h2>
+    <div class="text-end">
+        <div class="small text-muted">Patikumi: <strong>{{ patikumi }}</strong></div>
+        {% if not ir_piesledzis %}
+            <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-primary mt-1">Pieslēgties</a>
         {% endif %}
     </div>
 </div>
 
-<div style="margin-bottom: 20px;">
-    <h3>{{ patikumi }} 👍 Patikumi </h3>
-    {% if ir_piesledzis %}
-        <a href="{{ url_for('patikt') }}">👍 Patīk</a>
-    {% else %}
-        <p><a href="{{ url_for('login') }}">Pieslēgties</a> lai nospiestu patikt.</p>
-    {% endif %}
-</div>
-
-
-<div class="d-inline-flex p-2 bd-highlight"><h2>Diskusijas</h2>
 {% if diskusijas %}
-    {% for d in diskusijas %}
-            <a href="{{ url_for('diskusija', diskusijas_id=d.id) }}">{{ d.virsraksts }}</a>
-            <p>{{ d.saturs[:200] }}...</p>
-            <div class="info">
-                Autors: {{ d.lietotaja_id }} | {{ d.datums.strftime('%Y-%m-%d %H:%M') }} | Komentari: {{ d.komentari|length }}
+    <div class="row g-3">
+        {% for d in diskusijas %}
+            <div class="col-12 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title"><a href="{{ url_for('diskusija', diskusijas_id=d.id) }}" class="stretched-link text-decoration-none">{{ d.virsraksts }}</a></h5>
+                        <p class="card-text text-muted mb-3">{{ d.saturs[:200] }}{% if d.saturs|length > 200 %}...{% endif %}</p>
+                        <div class="mt-auto small text-muted">Autors: {{ d.lietotaja_id }} · {{ d.datums.strftime('%Y-%m-%d %H:%M') }} · Komentāri: {{ d.komentari|length }}</div>
+                    </div>
+                </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 {% else %}
-    <p>Nav nevienas diskusijas.</p>
+    <p class="text-muted">Nav nevienas diskusijas.</p>
 {% endif %}
-</div></body>
-</html>
+{% endblock %}
