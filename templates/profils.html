@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}{{ lietotajs.vards }} {{ lietotajs.uzvards }} — Mūschats{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                {% if lietotajs.konta_bilde %}
+                    <img src="{{ url_for('static', filename='uploads/' + lietotajs.konta_bilde) }}" alt="Profile" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-secondary mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; color: white; font-weight: bold; font-size: 48px;">{{ lietotajs.vards[0] }}</div>
+                {% endif %}
+                                <h3>{{ lietotajs.vards }} {{ lietotajs.uzvards }}</h3>
+                                <p class="text-muted">@{{ lietotajs.lietotajvards }}</p>
+                                {% if lietotajs.loma == 'Administrators' %}
+                                    <span class="badge bg-success mb-2">Administrators</span>
+                                {% elif lietotajs.loma == 'Skolotājs' %}
+                                    <span class="badge bg-warning text-dark mb-2">Skolotājs</span>
+                                {% elif lietotajs.loma == 'Skolēns' %}
+                                    <span class="badge bg-primary mb-2">Skolēns</span>
+                                {% endif %}
+                                <p class="text-muted"><strong>E-pasts:</strong> {{ lietotajs.epasts }}</p>
+                {% if lietotajs.bio %}
+                    <p class="mt-3">{{ lietotajs.bio }}</p>
+                {% else %}
+                    <p class="text-muted mt-3"><em>Šim lietotājam nav biogrāfijas.</em></p>
+                {% endif %}
+                {% if ir_piesledzis and session['lietotaja_id'] == lietotajs.id %}
+                    <a href="{{ url_for('konts') }}" class="btn btn-primary mt-3">Rediģēt profilu</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h5>Diskusijas ({{ lietotajs.diskusijas|length }})</h5>
+            {% if lietotajs.diskusijas %}
+                <div class="list-group">
+                    {% for d in lietotajs.diskusijas %}
+                        <a href="{{ url_for('diskusija', diskusijas_id=d.id) }}" class="list-group-item list-group-item-action">
+                            <h6 class="mb-1">{{ d.virsraksts }}</h6>
+                            <small class="text-muted">{{ d.datums.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Šis lietotājs nav izveidojis nevienu diskusiju.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

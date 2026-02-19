@@ -20,7 +20,7 @@
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title"><a href="{{ url_for('diskusija', diskusijas_id=d.id) }}" class="stretched-link text-decoration-none">{{ d.virsraksts }}</a></h5>
                         <p class="card-text text-muted mb-3">{{ d.saturs[:200] }}{% if d.saturs|length > 200 %}...{% endif %}</p>
-                        <div class="mt-auto small text-muted">Autors: {{ d.lietotaja_id }} · {{ d.datums.strftime('%Y-%m-%d %H:%M') }} · Komentāri: {{ d.komentari|length }}</div>
+                        <div class="mt-auto small text-muted">Autors: {{ d.lietotajs.lietotajvards }} · {{ d.datums.strftime('%Y-%m-%d %H:%M') }} · Komentāri: {{ d.komentari|length }}</div>
                     </div>
                 </div>
             </div>

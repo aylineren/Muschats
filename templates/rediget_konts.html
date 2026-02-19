@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block title %}Rediģēt kontu — Mūschats{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-7 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Rediģēt kontu</h3>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Vārds</label>
+                        <input type="text" class="form-control" name="vards" value="{{ lietotajs.vards }}" minlength="2" maxlength="25">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Uzvārds</label>
+                        <input type="text" class="form-control" name="uzvards" value="{{ lietotajs.uzvards }}" minlength="2" maxlength="20">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bio</label>
+                        <textarea class="form-control" name="bio" maxlength="500" rows="4" placeholder="Pastāsti par sevi...">{% if lietotajs.bio %}{{ lietotajs.bio }}{% endif %}</textarea>
+                        <small class="text-muted">Maks. 500 rakstzīmes</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jaunā parole (atstāj tukšu, ja negribi mainīt)</label>
+                        <input type="password" class="form-control" name="parole" minlength="8" maxlength="30">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Profila bilde</label>
+                        {% if lietotajs.konta_bilde %}
+                            <div class="mb-2">
+                                <img src="{{ url_for('static', filename='uploads/' + lietotajs.konta_bilde) }}" alt="Profila bilde" style="max-width: 150px; border-radius: 10px;">
+                            </div>
+                        {% endif %}
+                        <input type="file" class="form-control" name="konta_bilde" accept="image/*">
+                        <small class="text-muted">Pieļaujamie formāti: PNG, JPG, JPEG, GIF</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Saglabāt izmaiņas</button>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Atcelt</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

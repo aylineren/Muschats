@@ -26,13 +26,16 @@
         <ul class="navbar-nav ms-auto align-items-center">
           {% if ir_piesledzis %}
             <li class="nav-item d-flex align-items-center me-3">
-              {% if session.get('profile_pic') %}
-                <img src="{{ url_for('static', filename='uploads/' + session.get('profile_pic')) }}" alt="" class="rounded-circle me-2" style="width:34px;height:34px;object-fit:cover;">
+              {% if session.get('konta_bilde') %}
+                <img src="{{ url_for('static', filename='uploads/' + session.get('konta_bilde')) }}" alt="" class="rounded-circle me-2" style="width:34px;height:34px;object-fit:cover;">
               {% endif %}
               <span>Sveiki, <strong>{{ session['vards'] }}</strong></span>
             </li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">Profils</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('konts') }}">Profils</a></li>
+            {% if session.get('loma') == 'Administrators' %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_panel') }}">Admins</a></li>
+            {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Atteikties</a></li>
           {% else %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Pieslēgties</a></li>
@@ -44,11 +47,19 @@
   </nav>
 
   <main class="container py-4">
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="mb-3">
-          {% for m in messages %}
-            <div class="alert alert-info">{{ m }}</div>
+          {% for category, m in messages %}
+            {% if category == 'danger' %}
+              <div class="alert alert-danger">{{ m }}</div>
+            {% elif category == 'success' %}
+              <div class="alert alert-success">{{ m }}</div>
+            {% elif category == 'info' %}
+              <div class="alert alert-info">{{ m }}</div>
+            {% else %}
+              <div class="alert alert-info">{{ m }}</div>
+            {% endif %}
           {% endfor %}
         </div>
       {% endif %}

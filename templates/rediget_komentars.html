@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}Rediģēt komentāru — Mūschats{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Rediģēt komentāru</h3>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="saturs" class="form-label">Komentāra teksts</label>
+                        <textarea class="form-control" id="saturs" name="saturs" minlength="2" maxlength="500" required rows="4">{{ komentars.saturs }}</textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Saglabāt izmaiņas</button>
+                        <a href="{{ url_for('diskusija', diskusijas_id=komentars.diskusijas_id) }}" class="btn btn-secondary">Atcelt</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

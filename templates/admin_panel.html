@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+{% block title %}Administrātora panelis — Mūschats{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Administrātora panelis</h2>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Neapstiprināti skolotāji ({{ neapstiprinats_lietotajss|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if neapstiprinats_lietotajss %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Lietotājvārds</th>
+                                        <th>Vārds</th>
+                                        <th>Uzvārds</th>
+                                        <th>E-pasts</th>
+                                        <th>Darbības</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lietotajs in neapstiprinats_lietotajss %}
+                                        <tr>
+                                            <td><a href="{{ url_for('profils', lietotaja_vards=lietotajs.lietotajvards) }}" class="text-decoration-none">@{{ lietotajs.lietotajvards }}</a></td>
+                                            <td>{{ lietotajs.vards }}</td>
+                                            <td>{{ lietotajs.uzvards }}</td>
+                                            <td>{{ lietotajs.epasts }}</td>
+                                            <td>
+                                                <form method="POST" class="d-inline">
+                                                    <button formaction="{{ url_for('atstiprinat_lietotajs', lietotaja_id=lietotajs.id) }}" type="submit" class="btn btn-sm btn-success">Apstiprināt</button>
+                                                    <button formaction="{{ url_for('dzest_lietotajs', lietotaja_id=lietotajs.id) }}" type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vai tiešām vēlaties dzēst šo lietotāju?')">Dzēst</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Nav neviena neapstiprināta skolotāja.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Visi lietotāji ({{ all_lietotajss|length }})</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Lietotājvārds</th>
+                                    <th>Vārds</th>
+                                    <th>Uzvārds</th>
+                                    <th>E-pasts</th>
+                                    <th>Loma</th>
+                                    <th>Statuss</th>
+                                    <th>Darbības</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lietotajs in all_lietotajss %}
+                                    <tr>
+                                        <td><a href="{{ url_for('profils', lietotaja_vards=lietotajs.lietotajvards) }}" class="text-decoration-none">@{{ lietotajs.lietotajvards }}</a></td>
+                                        <td>{{ lietotajs.vards }}</td>
+                                        <td>{{ lietotajs.uzvards }}</td>
+                                        <td>{{ lietotajs.epasts }}</td>
+                                        <td>{{ lietotajs.loma }}</td>
+                                        <td>
+                                            {% if lietotajs.ir_apstiprinats %}
+                                                <span class="badge bg-success">Apstiprināts</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Neapstiprināts</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="POST" class="d-inline">
+                                                {% if not lietotajs.ir_apstiprinats %}
+                                                    <button formaction="{{ url_for('atstiprinat_lietotajs', lietotaja_id=lietotajs.id) }}" type="submit" class="btn btn-sm btn-success">Apstiprināt</button>
+                                                {% endif %}
+                                                {% if lietotajs.id != session.get('lietotaja_id') %}
+                                                    <button formaction="{{ url_for('dzest_lietotajs', lietotaja_id=lietotajs.id) }}" type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Vai tiešām vēlaties dzēst šo lietotāju?')">Dzēst</button>
+                                                {% endif %}
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
