@@ -81,9 +81,9 @@ def register():
         loma = request.form.get("loma")
         epasts = request.form.get("epasts")
         if Lietotaji.query.filter_by(lietotajvards=lietotajvards).first():
-            return "Lietotājvārds jau pastāv", 400
+            flash("Lietotājvārds jau pastāv")
         if Lietotaji.query.filter_by(epasts=epasts).first():
-            return "E-pasts jau reģistrēts", 400
+            flash("E-pasts jau reģistrēts")
         hashed_password = generate_password_hash(parole)
         ir_apstiprinats = True if loma != "Skolotajs" else False
         jauns_lietotajs = Lietotaji(lietotajvards=lietotajvards, parole=hashed_password, vards=vards, uzvards=uzvards, loma=loma, epasts=epasts, ir_apstiprinats=ir_apstiprinats)
@@ -110,7 +110,7 @@ def login():
             session['konta_bilde'] = lietotajs.konta_bilde
             session['loma'] = lietotajs.loma
             return redirect(url_for("index"))
-        return "Nepareizs lietotājvārds vai parole.", 401
+        flash("Nepareizs lietotājvārds vai parole.")
     return render_template("login.html")
 
 @app.route("/logout")

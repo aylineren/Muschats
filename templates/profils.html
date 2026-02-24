@@ -15,10 +15,12 @@
                                 <p class="text-muted">@{{ lietotajs.lietotajvards }}</p>
                                 {% if lietotajs.loma == 'Administrators' %}
                                     <span class="badge bg-success mb-2">Administrators</span>
-                                {% elif lietotajs.loma == 'Skolotājs' %}
+                                {% elif lietotajs.loma == 'Skolotajs' %}
                                     <span class="badge bg-warning text-dark mb-2">Skolotājs</span>
-                                {% elif lietotajs.loma == 'Skolēns' %}
+                                {% elif lietotajs.loma == 'Skolens' %}
                                     <span class="badge bg-primary mb-2">Skolēns</span>
+                                {% elif lietotajs.loma == 'Vecaks' %}
+                                    <span class="badge bg-info text-dark mb-2">Vecāks</span    
                                 {% endif %}
                                 <p class="text-muted"><strong>E-pasts:</strong> {{ lietotajs.epasts }}</p>
                 {% if lietotajs.bio %}

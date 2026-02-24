@@ -25,14 +25,15 @@
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav ms-auto align-items-center">
           {% if ir_piesledzis %}
-            <li class="nav-item d-flex align-items-center me-3">
-              {% if session.get('konta_bilde') %}
-                <img src="{{ url_for('static', filename='uploads/' + session.get('konta_bilde')) }}" alt="" class="rounded-circle me-2" style="width:34px;height:34px;object-fit:cover;">
-              {% endif %}
-              <span>Sveiki, <strong>{{ session['vards'] }}</strong></span>
-            </li>
+            <a href="{{ url_for('konts') }}" class="text-decoration-none">
+                <li class="nav-item d-flex align-items-center me-3">
+                {% if session.get('konta_bilde') %}
+                  <img src="{{ url_for('static', filename='uploads/' + session.get('konta_bilde')) }}" alt="" class="rounded-circle me-2" style="width:34px;height:34px;object-fit:cover;">
+                {% endif %}
+                <span>Sveiki, <strong>{{ session['vards'] }}</strong></span>
+              </li>
+            </a>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('konts') }}">Profils</a></li>
             {% if session.get('loma') == 'Administrators' %}
               <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_panel') }}">Admins</a></li>
             {% endif %}
