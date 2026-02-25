@@ -6,7 +6,17 @@
         <div class="col-12 col-lg-8">
             <div class="card mb-3 shadow-sm">
                 <div class="card-body">
-                    <h3 class="card-title">{{ diskusija.virsraksts }}</h3>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h3 class="card-title">{{ diskusija.virsraksts }}</h3>
+                        <div>
+                            {% if diskusija.ir_piefikseta %}
+                                <span class="badge bg-warning">📌 Piefiksēta</span>
+                            {% endif %}
+                            {% if diskusija.ir_slegta %}
+                                <span class="badge bg-secondary">🔒 Slēgta</span>
+                            {% endif %}
+                        </div>
+                    </div>
                     <p class="card-text">{{ diskusija.saturs }}</p>
                     <div class="d-flex align-items-center mt-3 pt-3 border-top justify-content-between">
                         <div class="d-flex align-items-center">
@@ -18,7 +28,15 @@
                                 {% endif %}
                             </a>
                             <div>
-                                <div><strong>{{ diskusija.lietotajs.vards }} {{ diskusija.lietotajs.uzvards }}</strong></div>
+                                <div>
+                                    <strong>{{ diskusija.lietotajs.vards }} {{ diskusija.lietotajs.uzvards }}</strong>
+                                    {% if diskusija.lietotajs.ir_apstiprinats_skolotajs %}
+                                        <span class="badge bg-info">Verificēts skolotājs</span>
+                                    {% endif %}
+                                    {% if diskusija.lietotajs.loma == 'Administrators' %}
+                                        <span class="badge bg-danger">Administrators</span>
+                                    {% endif %}
+                                </div>
                                 <a href="{{ url_for('profils', lietotaja_vards=diskusija.lietotajs.lietotajvards) }}" class="text-muted small text-decoration-none">@{{ diskusija.lietotajs.lietotajvards }}</a>
                                 <div class="text-muted small">{{ diskusija.datums.strftime('%Y-%m-%d %H:%M') }}
                                     {% if diskusija.ir_redigets %}
@@ -35,12 +53,26 @@
                                 </form>
                             </div>
                         {% elif ir_piesledzis and session.get('loma') == 'Administrators' %}
-                            <form method="POST" action="{{ url_for('dzest_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst šo diskusiju?')">Dzēst</button>
-                            </form>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <form method="POST" action="{{ url_for('toggle_lock_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">{% if diskusija.ir_slegta %}Atvērt{% else %}Slēgt{% endif %}</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('toggle_pin_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-warning btn-sm">{% if diskusija.ir_piefikseta %}Noņemt{% else %}Piefiksēt{% endif %}</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('dzest_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst?')">Dzēst</button>
+                                </form>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
+            </div>
+
+            <div class="mb-3">
+                <button class="btn btn-outline-danger btn-sm" id="likeBtn" onclick="likeDiskusija()">
+                    <span id="likeIcon">🤍</span> Patīk (<span id="likeCount">{{ diskusija.patikumi|length }}</span>)
+                </button>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -48,7 +80,7 @@
                 <a href="{{ url_for('index') }}" class="small">← Atpakaļ</a>
             </div>
 
-            {% if ir_piesledzis %}
+            {% if ir_piesledzis and not diskusija.ir_slegta %}
                 <div class="card mb-3">
                     <div class="card-body">
                         <form method="POST">
@@ -61,6 +93,8 @@
                         </form>
                     </div>
                 </div>
+            {% elif ir_piesledzis and diskusija.ir_slegta %}
+                <p class="text-muted alert alert-info">Šī diskusija ir slēgta un jaunus komentārus pievienot nevar.</p>
             {% else %}
                 <p><a href="{{ url_for('login') }}">Pieslēgties</a> lai komentētu.</p>
             {% endif %}
@@ -79,7 +113,15 @@
                                         {% endif %}
                                     </a>
                                     <div>
-                                        <strong>{{ k.lietotajs.vards }} {{ k.lietotajs.uzvards }}</strong>
+                                        <div>
+                                            <strong>{{ k.lietotajs.vards }} {{ k.lietotajs.uzvards }}</strong>
+                                            {% if k.lietotajs.ir_apstiprinats_skolotajs %}
+                                                <span class="badge bg-info" style="font-size: 11px;">Verificēts skolotājs</span>
+                                            {% endif %}
+                                            {% if k.lietotajs.loma == 'Administrators' %}
+                                                <span class="badge bg-danger" style="font-size: 11px;">Administrators</span>
+                                            {% endif %}
+                                        </div>
                                         <a href="{{ url_for('profils', lietotaja_vards=k.lietotajs.lietotajvards) }}" class="text-muted small text-decoration-none">@{{ k.lietotajs.lietotajvards }}</a>
                                         <div class="text-muted small">{{ k.datums.strftime('%Y-%m-%d %H:%M') }}
                                             {% if k.ir_redigets %}
@@ -92,16 +134,19 @@
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="{{ url_for('rediget_komentars', komentara_id=k.id) }}" class="btn btn-outline-primary btn-sm">Rediģēt</a>
                                         <form method="POST" action="{{ url_for('dzest_komentars', komentara_id=k.id) }}" style="display:inline;">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst šo komentāru?')">Dzēst</button>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst?')">Dzēst</button>
                                         </form>
                                     </div>
                                 {% elif ir_piesledzis and session.get('loma') == 'Administrators' %}
                                     <form method="POST" action="{{ url_for('dzest_komentars', komentara_id=k.id) }}" style="display:inline;">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst šo komentāru?')">Dzēst</button>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst?')">Dzēst</button>
                                     </form>
                                 {% endif %}
                             </div>
-                            <p class="mb-0">{{ k.saturs }}</p>
+                            <p class="mb-2">{{ k.saturs }}</p>
+                            <button class="btn btn-outline-danger btn-sm" onclick="likeKomentars({{ k.id }})">
+                                <span id="likeIcon{{ k.id }}">🤍</span> Patīk (<span id="likeCount{{ k.id }}">{{ k.patikumi|length }}</span>)
+                            </button>
                         </div>
                     {% endfor %}
                 </div>
@@ -110,4 +155,32 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+        const diskusijaId = {{ diskusija.id }};
+        
+        function likeDiskusija() {
+            fetch(`/like/diskusija/${diskusijaId}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('likeCount').textContent = data.like_count;
+                        document.getElementById('likeIcon').textContent = data.liked ? '❤️' : '🤍';
+                    }
+                })
+                .catch(e => console.error('Error:', e));
+        }
+
+        function likeKomentars(komentaraId) {
+            fetch(`/like/komentars/${komentaraId}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`likeCount${komentaraId}`).textContent = data.like_count;
+                        document.getElementById(`likeIcon${komentaraId}`).textContent = data.liked ? '❤️' : '🤍';
+                    }
+                })
+                .catch(e => console.error('Error:', e));
+        }
+    </script>
 {% endblock %}

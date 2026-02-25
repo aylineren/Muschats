@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block title %}Notikumi pārvalde — Mūschats{% endblock %}
+
+{% block content %}
+{% if session.get('loma') != 'Administrators' %}
+    <div class="alert alert-danger">Jums nav piekļuves šim lapai.</div>
+{% else %}
+    <h2>Notikumi pārvalde</h2>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Pievienot jaunu notikumu</h5>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="nosaukums" class="form-label">Notikuma nosaukums</label>
+                    <input type="text" class="form-control" id="nosaukums" name="nosaukums" required>
+                </div>
+                <div class="mb-3">
+                    <label for="apraksts" class="form-label">Apraksts</label>
+                    <textarea class="form-control" id="apraksts" name="apraksts" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="datums" class="form-label">Datums un laiks</label>
+                    <input type="datetime-local" class="form-control" id="datums" name="datums" required>
+                </div>
+                <div class="mb-3">
+                    <label for="tips" class="form-label">Veids</label>
+                    <select class="form-control" id="tips" name="tips" required>
+                        <option value="eksamen">Eksāmens</option>
+                        <option value="skolenes_notikums">Skolas notikums</option>
+                        <option value="cits">Cits</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Pievienot notikumu</button>
+            </form>
+        </div>
+    </div>
+
+    <h5>Gaidāmie Notikumi</h5>
+    {% if Notikumi %}
+        <div class="list-group">
+            {% for notikums in Notikumi %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">{{ notikums.nosaukums }}</h6>
+                        {% if notikums.apraksts %}
+                            <p class="mb-1 text-muted small">{{ notikums.apraksts }}</p>
+                        {% endif %}
+                        <small class="text-muted">
+                            📅 {{ notikums.datums.strftime('%Y-%m-%d %H:%M') }} — 
+                            {% if notikums.tips == 'eksamen' %}
+                                Eksāmens
+                            {% elif notikums.tips == 'skolenes_notikums' %}
+                                Skolas notikums
+                            {% else %}
+                                Cits
+                            {% endif %}
+                        </small>
+                    </div>
+                    <form method="POST" action="{{ url_for('dzest_notikums', notikuma_id=notikums.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst?')">Dzēst</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">Nav neviena notikuma.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}

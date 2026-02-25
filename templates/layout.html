@@ -23,6 +23,12 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="mainNav">
+        <div class="navbar-nav me-auto ms-3">
+          <form class="d-flex" action="{{ url_for('search') }}" method="GET">
+            <input class="form-control form-control-sm me-2" style="width: 250px;" type="search" placeholder="Meklēt..." name="q">
+            <button class="btn btn-outline-primary btn-sm" type="submit">Meklēt</button>
+          </form>
+        </div>
         <ul class="navbar-nav ms-auto align-items-center">
           {% if ir_piesledzis %}
             <a href="{{ url_for('konts') }}" class="text-decoration-none">
@@ -33,9 +39,19 @@
                 <span>Sveiki, <strong>{{ session['vards'] }}</strong></span>
               </li>
             </a>
+            
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('leaderboard') }}">Rangs</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('jauna_diskusija') }}">Jauna diskusija</a></li>
             {% if session.get('loma') == 'Administrators' %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_panel') }}">Admins</a></li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown">
+                  Admins
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="adminMenu">
+                  <li><a class="dropdown-item" href="{{ url_for('admin_panel') }}">Lietotāju pārvalde</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('admin_Notikumi') }}">Notikumi</a></li>
+                </ul>
+              </li>
             {% endif %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Atteikties</a></li>
           {% else %}

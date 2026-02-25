@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% block title %}Meklēšana: "{{ query }}" — Mūschats{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <form method="GET" class="d-flex gap-2">
+        <input type="text" name="q" class="form-control" placeholder="Meklēt diskusijas, komentārus, lietotājus..." value="{{ query }}">
+        <button type="submit" class="btn btn-primary">Meklēt</button>
+    </form>
+</div>
+
+{% if query %}
+    {% if results.diskusijas or results.komentari or results.lietotaji %}
+        <div class="row">
+            {% if results.diskusijas %}
+            <div class="col-12">
+                <h5>Diskusijas ({{ results.diskusijas|length }})</h5>
+                <div class="list-group mb-4">
+                    {% for diskusija in results.diskusijas %}
+                    <a href="{{ url_for('diskusija', diskusijas_id=diskusija.id) }}" class="list-group-item list-group-item-action">
+                        <h6 class="mb-1">{{ diskusija.virsraksts }}</h6>
+                        <p class="mb-1 text-muted small">{{ diskusija.saturs[:150] }}{% if diskusija.saturs|length > 150 %}...{% endif %}</p>
+                        <small class="text-muted">Autors: {{ diskusija.lietotajs.lietotajvards }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if results.komentari %}
+            <div class="col-12">
+                <h5>Komentāri ({{ results.komentari|length }})</h5>
+                <div class="list-group mb-4">
+                    {% for komentars in results.komentari %}
+                    <a href="{{ url_for('diskusija', diskusijas_id=komentars.diskusijas_id) }}" class="list-group-item list-group-item-action">
+                        <h6 class="mb-1">Komentārs no {{ komentars.lietotajs.lietotajvards }}</h6>
+                        <p class="mb-1 text-muted small">{{ komentars.saturs[:150] }}{% if komentars.saturs|length > 150 %}...{% endif %}</p>
+                        <small class="text-muted">Diskusija: {{ komentars.diskusija.virsraksts }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if results.lietotaji %}
+            <div class="col-12">
+                <h5>Lietotāji ({{ results.lietotaji|length }})</h5>
+                <div class="row g-3">
+                    {% for lietotajs in results.lietotaji %}
+                    <div class="col-12 col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <a href="{{ url_for('profils', lietotaja_vards=lietotajs.lietotajvards) }}" class="text-decoration-none">
+                                        {% if lietotajs.konta_bilde %}
+                                            <img src="{{ url_for('static', filename='uploads/' + lietotajs.konta_bilde) }}" alt="profils" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-secondary me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; color: white; font-weight: bold;">{{ lietotajs.vards[0] }}</div>
+                                        {% endif %}
+                                    </a>
+                                    <div>
+                                        <h6 class="mb-0">
+                                            <a href="{{ url_for('profils', lietotaja_vards=lietotajs.lietotajvards) }}" class="text-decoration-none">
+                                                {{ lietotajs.vards }} {{ lietotajs.uzvards }}
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">@{{ lietotajs.lietotajvards }}</small>
+                                        {% if lietotajs.ir_apstiprinats_skolotajs %}
+                                            <br><span class="badge bg-info">Verificēts skolotājs</span>
+                                        {% endif %}
+                                        {% if lietotajs.loma == 'Administrators' %}
+                                            <br><span class="badge bg-danger">Administrators</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="text-muted">Rezultātu nav atrasti.</p>
+    {% endif %}
+{% else %}
+    <p class="text-muted">Ievadiet vismaz 2 rakstzīmes, lai meklētu.</p>
+{% endif %}
+{% endblock %}
