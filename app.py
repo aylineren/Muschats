@@ -17,8 +17,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '555555'
 
-# OpenAI API Key
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', 'your-api-key-here')
+# OpenAI API atslēga
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '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') 
 
 db = SQLAlchemy(app)
 
@@ -104,12 +104,13 @@ ALLOWED_EXT = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
+# pārbauda saturu ar OpenAI moderācijas API, atgriež (drošs, iemesls)
 def moderate_content(content):
     """
     Check content with OpenAI's moderation API
     Returns: (is_safe, reason) tuple
     """
-    if not OPENAI_API_KEY or OPENAI_API_KEY == 'your-api-key-here':
+    if not OPENAI_API_KEY or OPENAI_API_KEY == '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':
         return True, "No API key configured"
     
     try:
@@ -125,7 +126,7 @@ def moderate_content(content):
             categories = result['results'][0]['categories']
             
             if flagged:
-                # Find which categories were flagged
+                # Atrodi, kuras kategorijas ir atzīmētas
                 flagged_items = [cat for cat, value in categories.items() if value]
                 reason = f"Saturs ir marķēts kā nepieņemams: {', '.join(flagged_items)}"
                 return False, reason
@@ -136,31 +137,33 @@ def moderate_content(content):
         print(f"Moderation error: {e}")
         return True, ""
 
+# aprēķina kopējo reputāciju lietotājam, pamatojoties uz "patīk" skaitu
 def calculate_user_reputation(user_id):
     """Calculate total reputation for a user based on likes"""
-    # Count likes on user's discussions
+    # Skaita atzīmes 'patīk' lietotāja diskusijās
     discussion_likes = db.session.query(DiskusijaPatikumi).join(
         Diskusijas, DiskusijaPatikumi.diskusijas_id == Diskusijas.id
     ).filter(Diskusijas.lietotaja_id == user_id).count()
     
-    # Count likes on user's comments
+    # Skaita atzīmes 'patīk' lietotāja komentāros
     comment_likes = db.session.query(KomentaraPatikumi).join(
         Komentari, KomentaraPatikumi.komentara_id == Komentari.id
     ).filter(Komentari.lietotaja_id == user_id).count()
     
     return discussion_likes + comment_likes
 
+# sākumlapa, rāda diskusijas, patikumu skaitu un tuvākos notikumus
 @app.route("/")
 def index():
     patikums = get_patikumi()
     
-    # Get all discussions sorted - pinned first, then by date
+    # Iegūst visas diskusijas sakārtotas - piefiksētās vispirms, pēc tam pēc datuma
     diskusijas = Diskusijas.query.order_by(
         Diskusijas.ir_piefikseta.desc(),
         Diskusijas.datums.desc()
     ).all()
     
-    # Get upcoming events
+    # Iegūst nākamos notikumus
     notikumi = Notikumi.query.filter(
         Notikumi.datums >= datetime.utcnow()
     ).order_by(Notikumi.datums.asc()).limit(5).all()
@@ -173,6 +176,7 @@ def index():
         Notikumi=notikumi
     )
 
+# reģistrācijas lapa jauniem lietotājiem
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -204,6 +208,7 @@ def register():
         return redirect(url_for("login"))
     return render_template("register.html")
 
+# pieslēgšanās lapa
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -223,18 +228,20 @@ def login():
         flash("Nepareizs lietotājvārds vai parole.")
     return render_template("login.html")
 
+# atslēgšanās no sesijas
 @app.route("/logout")
 def logout():
     session.clear()
     flash("Atteikšanas veiksmīga!")
     return redirect(url_for("index"))
 
+# izveido jaunu diskusiju
 @app.route("/diskusijas/jauna", methods=["GET", "POST"])
 def jauna_diskusija():
     if 'lietotajvards' not in session:
         return redirect(url_for("login"))
     
-    # Check if teacher account needs approval
+    # skolotaja apstiprinajuma parbaude
     lietotajs = Lietotaji.query.get(session['lietotaja_id'])
     if lietotajs.loma == "Skolotajs" and not lietotajs.ir_apstiprinats:
         flash("Jūs varat izveidot diskusijas tikai pēc apstiprinājuma.", "danger")
@@ -244,7 +251,7 @@ def jauna_diskusija():
         virsraksts = request.form.get("virsraksts")
         saturs = request.form.get("saturs")
         
-        # Check content moderation
+        # Pārbaudiet satura moderāciju
         is_safe, reason = moderate_content(f"{virsraksts} {saturs}")
         if not is_safe:
             flash(f"Saturs nevar tikt izvietots: {reason}", "danger")
@@ -261,21 +268,24 @@ def jauna_diskusija():
         return redirect(url_for("index"))
     return render_template("jauna_diskusija.html")
 
+# apskata un komentē izvēlēto diskusiju
 @app.route("/diskusijas/<int:diskusijas_id>", methods=["GET", "POST"])
 def diskusija(diskusijas_id):
     diskusija = Diskusijas.query.get_or_404(diskusijas_id)
     
-    if diskusija.ir_slegta and 'lietotajvards' in session:
-        lietotajs = Lietotaji.query.get(session['lietotaja_id'])
-        if lietotajs.id != diskusija.lietotaja_id and lietotajs.loma != 'Administrators':
-            flash("Šī diskusija ir slēgta.", "info")
-            return redirect(url_for("index"))
+    # Anyone can view locked discussions and their comments
+    # They just can't comment (that's handled in the template)
     
     if request.method == "POST":
         if 'lietotajvards' not in session:
             return redirect(url_for("login"))
         
-        # Check if teacher account is verified
+        # Check if discussion is locked - prevent commenting
+        if diskusija.ir_slegta:
+            flash("Šī diskusija ir slēgta, nevar pievienot komentārus.", "danger")
+            return redirect(url_for("diskusija", diskusijas_id=diskusijas_id))
+        
+        # Pārbaudiet, vai skolotāja konts ir verificēts
         lietotajs = Lietotaji.query.get(session['lietotaja_id'])
         if lietotajs.loma == "Skolotajs" and not lietotajs.ir_apstiprinats:
             flash("Jūs varat komentēt tikai pēc apstiprinājuma.", "danger")
@@ -283,7 +293,7 @@ def diskusija(diskusijas_id):
         
         saturs = request.form.get("saturs")
         
-        # Check content moderation
+        # Pārbaudiet satura moderāciju
         is_safe, reason = moderate_content(saturs)
         if not is_safe:
             flash(f"Saturs nevar tikt izvietots: {reason}", "danger")
@@ -305,6 +315,8 @@ def diskusija(diskusijas_id):
         ir_piesledzis='lietotajvards' in session
     )
 
+
+# atjaunina un atgriež kopējo "patīk" skaitu
 def get_patikumi():
     patikums = Patikumi.query.first()
     if not patikums:
@@ -317,6 +329,7 @@ def get_patikumi():
         db.session.commit()
     return patikums
 
+# ērta atzīme "Patīk" mājas lapā
 @app.route("/patikt")
 def patikt():
     if 'lietotajvards' not in session:
@@ -331,6 +344,7 @@ def patikt():
     patikums = get_patikumi()
     return redirect(url_for("index"))
 
+# pārslēdz 'patīk' diskusijai
 @app.route('/like/diskusija/<int:diskusijas_id>', methods=['POST'])
 def like_diskusija(diskusijas_id):
     if 'lietotajvards' not in session:
@@ -339,25 +353,25 @@ def like_diskusija(diskusijas_id):
     lietotaja_id = session['lietotaja_id']
     diskusija = Diskusijas.query.get_or_404(diskusijas_id)
     
-    # Check if already liked
+    # pārbaudiet, vai jau ir like
     existing = DiskusijaPatikumi.query.filter_by(
         diskusijas_id=diskusijas_id, 
         lietotaja_id=lietotaja_id
     ).first()
     
     if existing:
-        # Unlike
+        # Noņem "patīk"
         db.session.delete(existing)
         db.session.commit()
         liked = False
     else:
-        # Like
+        # Pievieno "patīk"
         like = DiskusijaPatikumi(diskusijas_id=diskusijas_id, lietotaja_id=lietotaja_id)
         db.session.add(like)
         db.session.commit()
         liked = True
     
-    # Update user reputation
+    #  atjaunināt lietotāja reputāciju
     user = Lietotaji.query.get(diskusija.lietotaja_id)
     user.reputacija = calculate_user_reputation(user.id)
     db.session.commit()
@@ -365,6 +379,7 @@ def like_diskusija(diskusijas_id):
     like_count = DiskusijaPatikumi.query.filter_by(diskusijas_id=diskusijas_id).count()
     return jsonify({'success': True, 'liked': liked, 'like_count': like_count})
 
+# pārslēdz 'patīk' komentāram
 @app.route('/like/komentars/<int:komentara_id>', methods=['POST'])
 def like_komentars(komentara_id):
     if 'lietotajvards' not in session:
@@ -373,25 +388,25 @@ def like_komentars(komentara_id):
     lietotaja_id = session['lietotaja_id']
     komentars = Komentari.query.get_or_404(komentara_id)
     
-    # Check if already liked
+    # pārbaudiet, vai jau ir like
     existing = KomentaraPatikumi.query.filter_by(
         komentara_id=komentara_id, 
         lietotaja_id=lietotaja_id
     ).first()
     
     if existing:
-        # Unlike
+        # Noņem "patīk"
         db.session.delete(existing)
         db.session.commit()
         liked = False
     else:
-        # Like
+        # Pievieno "patīk"
         like = KomentaraPatikumi(komentara_id=komentara_id, lietotaja_id=lietotaja_id)
         db.session.add(like)
         db.session.commit()
         liked = True
     
-    # Update user reputation
+    # atjaunināt lietotāja reputāciju
     user = Lietotaji.query.get(komentars.lietotaja_id)
     user.reputacija = calculate_user_reputation(user.id)
     db.session.commit()
@@ -399,6 +414,7 @@ def like_komentars(komentara_id):
     like_count = KomentaraPatikumi.query.filter_by(komentara_id=komentara_id).count()
     return jsonify({'success': True, 'liked': liked, 'like_count': like_count})
 
+# meklē diskusijas, komentārus un lietotājus
 @app.route('/search', methods=['GET'])
 def search():
     query = request.args.get('q', '').strip()
@@ -407,7 +423,7 @@ def search():
     if len(query) < 2:
         return render_template('search.html', query=query, results=results)
     
-    # Search discussions by title and content
+    # mekle diskusijas
     diskusijas = Diskusijas.query.filter(
         or_(
             Diskusijas.virsraksts.ilike(f'%{query}%'),
@@ -434,6 +450,7 @@ def search():
     
     return render_template('search.html', query=query, results=results)
 
+# lietotāja konta iestatījumu lapa
 @app.route('/konts', methods=['GET', 'POST'])
 def konts():
     if 'lietotajvards' not in session:
@@ -467,16 +484,17 @@ def konts():
         return redirect(url_for('konts'))
     return render_template('rediget_konts.html', lietotajs=lietotajs)
 
+# parāda lietotāja profilu
 @app.route('/profils/<lietotaja_vards>')
 def profils(lietotaja_vards):
     lietotajs = Lietotaji.query.filter_by(lietotajvards=lietotaja_vards).first_or_404()
     
-    # Calculate total reputation (likes on all posts and comments)
     lietotajs.reputacija = calculate_user_reputation(lietotajs.id)
     db.session.commit()
     
     return render_template('profils.html', lietotajs=lietotajs)
 
+# rediģē diskusijas saturu
 @app.route('/diskusijas/<int:diskusijas_id>/rediget', methods=['GET', 'POST'])
 def rediget_diskusija(diskusijas_id):
     diskusija = Diskusijas.query.get_or_404(diskusijas_id)
@@ -487,7 +505,7 @@ def rediget_diskusija(diskusijas_id):
         virsraksts = request.form.get('virsraksts')
         saturs = request.form.get('saturs')
         
-        # Check content moderation
+        # moderacija
         is_safe, reason = moderate_content(f"{virsraksts} {saturs}")
         if not is_safe:
             flash(f"Saturs nevar tikt atjaunots: {reason}", "danger")
@@ -502,6 +520,7 @@ def rediget_diskusija(diskusijas_id):
         return redirect(url_for('diskusija', diskusijas_id=diskusijas_id))
     return render_template('rediget_diskusija.html', diskusija=diskusija)
 
+# dzest diskusiju
 @app.route('/diskusijas/<int:diskusijas_id>/dzest', methods=['POST'])
 def dzest_diskusija(diskusijas_id):
     diskusija = Diskusijas.query.get_or_404(diskusijas_id)
@@ -513,35 +532,43 @@ def dzest_diskusija(diskusijas_id):
     flash("Diskusija dzēsta!")
     return redirect(url_for('index'))
 
+# pārslēdz diskusijas slegsanu
 @app.route('/diskusijas/<int:diskusijas_id>/toggle_lock', methods=['POST'])
 def toggle_lock_diskusija(diskusijas_id):
     diskusija = Diskusijas.query.get_or_404(diskusijas_id)
     lietotajs = Lietotaji.query.get(session.get('lietotaja_id'))
-    
-    # Only author or admin can lock
-    if diskusija.lietotaja_id != session.get('lietotaja_id') and session.get('loma') != 'Administrators':
-        flash("Jums nav atļaujas to darīt.", "danger")
+
+    if diskusija.lietotaja_id != session.get('lietotaja_id') and session.get('loma') not in ['Administrators', 'Skolotajs']:
+        flash("Jums nav atļaujas bloķēt/atbloķēt šo diskusiju.", "danger")
         return redirect(url_for('diskusija', diskusijas_id=diskusijas_id))
-    
-    diskusija.ir_slegta = not diskusija.ir_slegta
+
+    prev = diskusija.ir_slegta
+    new_value = not prev
+    Diskusijas.query.filter_by(id=diskusijas_id).update({'ir_slegta': new_value})
     db.session.commit()
-    status = "slēgta" if diskusija.ir_slegta else "atvērta"
+    app.logger.info(f"toggle_lock: diskusija_id={diskusijas_id} prev={prev} new={new_value} by user={session.get('lietotaja_id')}")
+    status = "slēgta" if new_value else "atvērta"
     flash(f"Diskusija ir tagad {status}.", "success")
     return redirect(url_for('diskusija', diskusijas_id=diskusijas_id))
 
+# pārslēdz diskusijas piefiksēšanu
 @app.route('/diskusijas/<int:diskusijas_id>/toggle_pin', methods=['POST'])
 def toggle_pin_diskusija(diskusijas_id):
-    if session.get('loma') != 'Administrators':
-        flash("Jums nav atļaujas to darīt.", "danger")
-        return redirect(url_for('index'))
-    
+    # only admins and teachers can pin/unpin discussions
+    if session.get('loma') not in ['Administrators', 'Skolotajs']:
+        flash("Jums nav atļaujas piefiksēt šo diskusiju.", "danger")
+        return redirect(url_for('diskusija', diskusijas_id=diskusijas_id))
     diskusija = Diskusijas.query.get_or_404(diskusijas_id)
-    diskusija.ir_piefikseta = not diskusija.ir_piefikseta
+    prev = diskusija.ir_piefikseta
+    new_value = not prev
+    Diskusijas.query.filter_by(id=diskusijas_id).update({'ir_piefikseta': new_value})
     db.session.commit()
-    status = "piefiksēta" if diskusija.ir_piefikseta else "noņemta no piefiksēšanas"
+    app.logger.info(f"toggle_pin: diskusija_id={diskusijas_id} prev={prev} new={new_value} by user={session.get('lietotaja_id')}")
+    status = "piefiksēta" if new_value else "noņemta no piefiksēšanas"
     flash(f"Diskusija ir {status}.", "success")
     return redirect(url_for('diskusija', diskusijas_id=diskusijas_id))
 
+# rediģē komentāra saturu
 @app.route('/komentari/<int:komentara_id>/rediget', methods=['GET', 'POST'])
 def rediget_komentars(komentara_id):
     komentars = Komentari.query.get_or_404(komentara_id)
@@ -551,7 +578,7 @@ def rediget_komentars(komentara_id):
     if request.method == 'POST':
         saturs = request.form.get('saturs')
         
-        # Check content moderation
+        # moderacija
         is_safe, reason = moderate_content(saturs)
         if not is_safe:
             flash(f"Saturs nevar tikt atjaunots: {reason}", "danger")
@@ -565,6 +592,7 @@ def rediget_komentars(komentara_id):
         return redirect(url_for('diskusija', diskusijas_id=komentars.diskusijas_id))
     return render_template('rediget_komentars.html', komentars=komentars)
 
+# dzēst komentāru
 @app.route('/komentari/<int:komentara_id>/dzest', methods=['POST'])
 def dzest_komentars(komentara_id):
     komentars = Komentari.query.get_or_404(komentara_id)
@@ -577,12 +605,13 @@ def dzest_komentars(komentara_id):
     flash("Komentārs dzēsts!")
     return redirect(url_for('diskusija', diskusijas_id=diskusijas_id))
 
+# rāda lietotāju reputācijas topu
 @app.route('/leaderboard')
 def leaderboard():
-    # Get top users by reputation
     top_users = Lietotaji.query.order_by(Lietotaji.reputacija.desc()).limit(50).all()
     return render_template('leaderboard.html', top_users=top_users)
 
+# administrators paneļa skatītājs
 @app.route('/admin/panel')
 def admin_panel():
     if session.get('loma') != 'Administrators':
@@ -598,6 +627,7 @@ def admin_panel():
         all_lietotajss=all_lietotajss
     )
 
+# administrators apstiprina lietotāju
 @app.route('/admin/atstiprinat/<int:lietotaja_id>', methods=['POST'])
 def atstiprinat_lietotajs(lietotaja_id):
     if session.get('loma') != 'Administrators':
@@ -609,6 +639,7 @@ def atstiprinat_lietotajs(lietotaja_id):
     flash(f"Lietotājs {lietotajs.lietotajvards} tika apstiprinājis!", "success")
     return redirect(url_for('admin_panel'))
 
+# administrators verificē skolotāju
 @app.route('/admin/verificet_skolotajs/<int:lietotaja_id>', methods=['POST'])
 def verificet_skolotajs(lietotaja_id):
     if session.get('loma') != 'Administrators':
@@ -625,6 +656,7 @@ def verificet_skolotajs(lietotaja_id):
     flash(f"Skolotājs {lietotajs.lietotajvards} ir verificēts!", "success")
     return redirect(url_for('admin_panel'))
 
+# administrators dzēš lietotāju
 @app.route('/admin/dzest_lietotajs/<int:lietotaja_id>', methods=['POST'])
 def dzest_lietotajs(lietotaja_id):
     if session.get('loma') != 'Administrators':
@@ -636,6 +668,7 @@ def dzest_lietotajs(lietotaja_id):
     flash(f"Lietotājs {lietotajs.lietotajvards} tika dzēsts!", "success")
     return redirect(url_for('admin_panel'))
 
+# administrators var pievienot / pārvaldīt notikumus
 @app.route('/admin/Notikumi', methods=['GET', 'POST'])
 def admin_Notikumi():
     if session.get('loma') != 'Administrators':
@@ -661,6 +694,7 @@ def admin_Notikumi():
     notikumi = Notikumi.query.order_by(Notikumi.datums.asc()).all()
     return render_template('admin_Notikumi.html', Notikumi=notikumi)
 
+# administrators dzēš notikumu
 @app.route('/admin/notikums/<int:notikuma_id>/dzest', methods=['POST'])
 def dzest_notikums(notikuma_id):
     if session.get('loma') != 'Administrators':
@@ -673,6 +707,7 @@ def dzest_notikums(notikuma_id):
     flash("Notikums dzēsts!", "success")
     return redirect(url_for('admin_Notikumi'))
 
+# kopīgas vērtības visos šablonos
 @app.context_processor
 def inject_common():
     return {

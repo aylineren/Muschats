@@ -45,24 +45,27 @@
                                 </div>
                             </div>
                         </div>
-                        {% if ir_piesledzis and session['lietotaja_id'] == diskusija.lietotaja_id %}
+                        {% if ir_piesledzis %}
                             <div class="btn-group btn-group-sm" role="group">
-                                <a href="{{ url_for('rediget_diskusija', diskusijas_id=diskusija.id) }}" class="btn btn-outline-primary">Rediģēt</a>
-                                <form method="POST" action="{{ url_for('dzest_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Vai tiešām vēlaties dzēst šo diskusiju?')">Dzēst</button>
-                                </form>
-                            </div>
-                        {% elif ir_piesledzis and session.get('loma') == 'Administrators' %}
-                            <div class="btn-group btn-group-sm" role="group">
-                                <form method="POST" action="{{ url_for('toggle_lock_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">{% if diskusija.ir_slegta %}Atvērt{% else %}Slēgt{% endif %}</button>
-                                </form>
-                                <form method="POST" action="{{ url_for('toggle_pin_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-outline-warning btn-sm">{% if diskusija.ir_piefikseta %}Noņemt{% else %}Piefiksēt{% endif %}</button>
-                                </form>
-                                <form method="POST" action="{{ url_for('dzest_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst?')">Dzēst</button>
-                                </form>
+                                {% if session['lietotaja_id'] == diskusija.lietotaja_id %}
+                                    <a href="{{ url_for('rediget_diskusija', diskusijas_id=diskusija.id) }}" class="btn btn-outline-primary btn-sm">Rediģēt</a>
+                                    <form method="POST" action="{{ url_for('dzest_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst šo diskusiju?')">Dzēst</button>
+                                    </form>
+                                {% endif %}
+                                {% if session.get('loma') in ['Administrators', 'Skolotajs'] %}
+                                    <form method="POST" action="{{ url_for('toggle_lock_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm">{% if diskusija.ir_slegta %}Atvērt{% else %}Slēgt{% endif %}</button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('toggle_pin_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-outline-warning btn-sm">{% if diskusija.ir_piefikseta %}Noņemt{% else %}Piefiksēt{% endif %}</button>
+                                    </form>
+                                    {% if session['lietotaja_id'] != diskusija.lietotaja_id %}
+                                        <form method="POST" action="{{ url_for('dzest_diskusija', diskusijas_id=diskusija.id) }}" style="display:inline;">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Vai tiešām vēlaties dzēst?')">Dzēst</button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                         {% endif %}
                     </div>
@@ -80,7 +83,9 @@
                 <a href="{{ url_for('index') }}" class="small">← Atpakaļ</a>
             </div>
 
-            {% if ir_piesledzis and not diskusija.ir_slegta %}
+            {% if diskusija.ir_slegta %}
+                <p class="text-muted alert alert-info">Šī diskusija ir slēgta un jaunus komentārus pievienot nevar.</p>
+            {% elif ir_piesledzis %}
                 <div class="card mb-3">
                     <div class="card-body">
                         <form method="POST">
@@ -93,8 +98,6 @@
                         </form>
                     </div>
                 </div>
-            {% elif ir_piesledzis and diskusija.ir_slegta %}
-                <p class="text-muted alert alert-info">Šī diskusija ir slēgta un jaunus komentārus pievienot nevar.</p>
             {% else %}
                 <p><a href="{{ url_for('login') }}">Pieslēgties</a> lai komentētu.</p>
             {% endif %}
